@@ -103,12 +103,43 @@ class BookController:
         select_genre_button = tk.Button(genre_window, text="Select", command=select_genre)
         select_genre_button.pack()
 
-    # Видалення книги за назвою
+    # Метод видалення книги за назвою
     def delete_book(self):
-        title = simpledialog.askstring("Видалення книги", "Введіть назву книги для видалення:")
-        if title:
-            self.book_list = [book for book in self.book_list if book.title.lower() != title.lower()]
-            messagebox.showinfo("Результат", f"Книгу '{title}' видалено." if title else "Книгу не знайдено.")
+        if not self.book_list:
+            messagebox.showinfo("Помилка", "Немає книг для видалення.")
+            return
+
+        # Создание окна для выбора книги
+        delete_window = tk.Toplevel(self.app.root)
+        delete_window.title("Вибір книги для видалення")
+
+        # Создание списка книг
+        listbox = tk.Listbox(delete_window, selectmode=tk.SINGLE)
+        for book in self.book_list:
+            listbox.insert(tk.END, book.title)
+
+        listbox.pack(padx=20, pady=10)
+
+        def on_delete():
+            try:
+                # Получаем выбранную книгу
+                selected_index = listbox.curselection()[0]
+                selected_book_title = self.book_list[selected_index].title
+
+                # Удаляем выбранную книгу из списка
+                self.book_list = [book for book in self.book_list if book.title != selected_book_title]
+                messagebox.showinfo("Результат", f"Книгу '{selected_book_title}' видалено.")
+                delete_window.destroy()
+            except IndexError:
+                messagebox.showwarning("Помилка", "Будь ласка, виберіть книгу для видалення.")
+
+        # Кнопка для удаления
+        delete_button = tk.Button(delete_window, text="Видалити", command=on_delete)
+        delete_button.pack(pady=5)
+
+        # Кнопка для закриття вікна без змін
+        cancel_button = tk.Button(delete_window, text="Скасувати", command=delete_window.destroy)
+        cancel_button.pack(pady=5)
 
     # Оновлення інформації про книгу
     def update_book(self):
