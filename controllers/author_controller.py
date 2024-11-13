@@ -7,9 +7,10 @@ from utils.ask_date import ask_date
 
 
 class AuthorController:
-    def __init__(self, app, author_list):
+    def __init__(self, app, author_list, book_list):
         self.app = app
         self.author_list = author_list  # Доступ к списку авторов
+        self.book_list = book_list  # Доступ к списку книг
 
     # Метод додавання автора
     def add_author(self):
@@ -59,7 +60,7 @@ class AuthorController:
             return
 
         # Создаём окно для выбора автора
-        delete_window = tk.Toplevel(self.root)
+        delete_window = tk.Toplevel(self.app.root)
         delete_window.title("Вибір автора для видалення")
 
         # Добавляем список авторов
@@ -97,7 +98,7 @@ class AuthorController:
             return
 
         # Окно для выбора автора
-        update_window = tk.Toplevel(self.root)
+        update_window = tk.Toplevel(self.app.root)
         update_window.title("Вибір автора для оновлення")
 
         # Добавление списка авторов
@@ -152,6 +153,10 @@ class AuthorController:
         # Кнопка для закрытия окна без изменений
         cancel_button = tk.Button(update_window, text="Скасувати", command=update_window.destroy)
         cancel_button.pack(pady=5)
+
+    # Пошук авторів
+    def find_author_by_name(self, name):
+        return next((author for author in self.author_list if author.name.lower() == name.lower()), None)
 
     # Пошук книг за автором
     def search_books_by_author(self):
