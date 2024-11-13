@@ -6,7 +6,7 @@ from typing import Optional
 # Функція для перевірки коректного формату дати
 def ask_date(prompt: str) -> Optional[datetime]:
     while True:
-        date_str = simpledialog.askstring(prompt, f"{prompt} (YYYY-MM-DD) або залиште пустим:")
+        date_str = simpledialog.askstring(prompt, f"{prompt} (YYYY-MM-DD):")
         if not date_str:  # Якщо дата не введена, повертаємо None
             return None
         try:

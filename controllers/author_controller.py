@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox, filedialog
-
 from constants.countries import COUNTRIES
 from models import Author
 from utils.ask_date import ask_date
@@ -15,41 +14,76 @@ class AuthorController:
     # Метод додавання автора
     def add_author(self):
         # Запит імені
-        name = simpledialog.askstring("Додавання автора", "Введіть ім'я автора:")
-        if not name:
-            return  # Якщо натиснуто Cancel
+        name = None
+        while not name:
+            name = simpledialog.askstring("Додавання автора", "Введіть ім'я автора:")
+            if name is None:  # Якщо натиснуто Cancel або закрито вікно
+                return
+            if not name:  # Якщо залишено порожнім
+                messagebox.showwarning("Помилка", "Ім'я автора не може бути порожнім.")
 
-        # Вибір країни
-        country = simpledialog.askstring("Країна", f"Виберіть країну {COUNTRIES}:")
-        if not country:
-            return  # Якщо натиснуто Cancel
+        # Вибір країни з меню
+        country_window = tk.Toplevel()
+        country_window.title("Select Country")
+        country_label = tk.Label(country_window, text="Choose a country:")
+        country_label.pack()
 
-        # Запит дати народження
-        birth_date = ask_date("Дата народження")
-        if birth_date is None:
-            return  # Якщо натиснуто Cancel або невірний формат дати
+        country_var = tk.StringVar()
+        country_var.set(COUNTRIES[0])  # За замовчуванням перша країна
 
-        # Запит дати смерті
-        death_date = ask_date("Дата смерті")
-        if death_date is None:
-            return  # Якщо натиснуто Cancel або невірний формат дати
+        country_menu = tk.OptionMenu(country_window, country_var, *COUNTRIES)
+        country_menu.pack()
 
-        # Запит статі
-        gender = simpledialog.askstring("Стать", "Введіть стать (чоловіча або жіноча):")
-        if not gender:
-            return  # Якщо натиснуто Cancel
+        def select_country():
+            country = country_var.get()
+            country_window.destroy()
 
-        # Вибір файлу біографії
-        biography_link = filedialog.askopenfilename(title="Виберіть файл біографії")
-        if not biography_link:
-            return  # Якщо натиснуто Cancel
+            # Запит дати народження
+            birth_date = None
+            while not birth_date:
+                birth_date = ask_date("Дата народження")
+                if not birth_date:  # Якщо залишено порожнім
+                    messagebox.showwarning("Помилка", "Дата народження не може бути порожньою.")
+                elif birth_date is None:  # Якщо натиснуто Cancel або невірний формат дати
+                    return
 
-        # Створення автора
-        author = Author(name, country, birth_date, death_date, gender, biography_link)
 
-        # Додавання автора до списку
-        self.author_list.append(author)
-        messagebox.showinfo("Success", "Author added successfully!")
+            # Запит дати смерті
+            death_date = None
+            while not death_date:
+                death_date = ask_date("Дата смерті")
+                if not death_date:  # Якщо залишено порожнім
+                    messagebox.showwarning("Помилка", "Дата смерті не може бути порожньою.")
+                elif death_date is None:  # Якщо натиснуто Cancel або невірний формат дати
+                    return
+
+            # Запит статі
+            gender = None
+            while not gender:
+                gender = simpledialog.askstring("Стать", "Введіть стать (чоловіча або жіноча):")
+                if gender is None:  # Якщо натиснуто Cancel або закрито вікно
+                    return
+                if not gender:  # Якщо залишено порожнім
+                    messagebox.showwarning("Помилка", "Стать не може бути порожньою.")
+
+            # Вибір файлу біографії
+            biography_link = None
+            while not biography_link:
+                biography_link = filedialog.askopenfilename(title="Виберіть файл біографії")
+                if not biography_link:  # Якщо натиснуто Cancel або не вибрано файл
+                    messagebox.showwarning("Помилка", "Файл біографії не вибрано.")
+                    return
+
+            # Створення автора
+            author = Author(name, country, birth_date, death_date, gender, biography_link)
+
+            # Додавання автора до списку
+            self.author_list.append(author)
+            messagebox.showinfo("Success", "Author added successfully!")
+
+        # Кнопка для підтвердження вибору країни
+        select_country_button = tk.Button(country_window, text="Select", command=select_country)
+        select_country_button.pack()
     pass
 
     def delete_author(self):
