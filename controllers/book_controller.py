@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import simpledialog, filedialog, messagebox
-
 from constants.countries import COUNTRIES
 from constants.genres import GENRES
 from models import Author, Book
@@ -14,14 +13,22 @@ class BookController:
     # Метод додавання книги
     def add_book(self):
         # Введення назви книги
-        title = simpledialog.askstring("Input", "Enter the book title:")
-        if not title:  # Якщо натиснуто Cancel
-            return
+        title = None
+        while not title:  # Цикл будет продолжаться, пока не введено название
+            title = simpledialog.askstring("Input", "Enter the book title:")
+            if title is None:  # Якщо натиснуто Cancel або закрито вікно
+                return
+            if not title:  # Якщо залишено порожнім
+                messagebox.showwarning("Warning", "Please enter a title for the book.")
 
         # Введення імені автора
-        author_name = simpledialog.askstring("Input", "Enter the author:")
-        if not author_name:  # Якщо натиснуто Cancel
-            return
+        author_name = None
+        while not author_name:  # Цикл буде продовжуватися, поки не введено ім'я автора
+            author_name = simpledialog.askstring("Input", "Enter the author:")
+            if author_name is None:  # Якщо натиснуто Cancel або закрито вікно
+                return
+            if not author_name:  # Якщо залишено порожнім
+                messagebox.showwarning("Warning", "Please enter the author's name.")
 
         # Створення вікна для вибору жанру
         genre_window = tk.Toplevel()
@@ -65,9 +72,13 @@ class BookController:
                     return
 
                 # Оцінка книги
-                rating = simpledialog.askinteger("Input", "Rate the book (1-5):", minvalue=1, maxvalue=5)
-                if not rating:  # Якщо натиснуто Cancel
-                    return
+                rating = None
+                while rating is None:  # Цикл для оцінки книги, поки не введено значення
+                    rating = simpledialog.askinteger("Input", "Rate the book (1-5):", minvalue=1, maxvalue=5)
+                    if rating is None:  # Якщо натиснуто Cancel або закрито вікно
+                        return
+                    if not (1 <= rating <= 5):  # Перевірка на діапазон
+                        messagebox.showwarning("Warning", "Please rate the book between 1 and 5.")
 
                 # Перевірка всіх полів
                 if title and author_name and genre and country:
