@@ -3,8 +3,9 @@ from tkinter import messagebox, simpledialog, filedialog
 from typing import List, Optional
 import json
 from models import Author, Book
-from constants import GENRES, COUNTRIES
-from utils import ask_date
+from constants.countries import COUNTRIES
+from constants.genres import GENRES
+from utils.ask_date import ask_date
 
 
 # Головний клас програми
