@@ -3,10 +3,10 @@ from tkinter import filedialog, messagebox
 from models import Book, Author
 
 class DataController:
-    def __init__(self, app, book_list, author_list):
+    def __init__(self, app, author_list, book_list):
         self.app = app
         self.book_list = book_list
-        self.author_list = author_list  # Доступ к спискам для загрузки/сохранения
+        self.author_list = author_list
 
     # Збереження даних у файл
     def save_data(self):

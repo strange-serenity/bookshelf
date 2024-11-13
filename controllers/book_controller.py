@@ -6,9 +6,10 @@ from models import Author, Book
 
 
 class BookController:
-    def __init__(self, app, book_list):
+    def __init__(self, app, author_list, book_list):
         self.app = app
-        self.book_list = book_list  # Теперь у контроллера есть доступ к списку книг
+        self.book_list = book_list
+        self.author_list = author_list
 
     # Метод додавання книги
     def add_book(self):
@@ -21,14 +22,24 @@ class BookController:
             if not title:  # Якщо залишено порожнім
                 messagebox.showwarning("Warning", "Please enter a title for the book.")
 
-        # Введення імені автора
-        author_name = None
-        while not author_name:  # Цикл буде продовжуватися, поки не введено ім'я автора
-            author_name = simpledialog.askstring("Input", "Enter the author:")
-            if author_name is None:  # Якщо натиснуто Cancel або закрито вікно
-                return
-            if not author_name:  # Якщо залишено порожнім
-                messagebox.showwarning("Warning", "Please enter the author's name.")
+        # Перевірка на наявність авторів
+        if not self.author_list:
+            messagebox.showwarning("Warning",
+                                   "There are no authors available. You cannot create a book without authors.")
+            return
+
+        # Вибір автора з існуючого списку
+        author_names = [author.name for author in self.author_list]
+        author_name = simpledialog.askstring("Select Author", "Choose an author:\n" + "\n".join(author_names))
+
+        if author_name is None:  # Якщо натиснуто Cancel або закрито вікно
+            return
+        if author_name not in author_names:  # Якщо вибраний автор не знайдений у списку
+            messagebox.showwarning("Warning", "Author not found.")
+            return
+
+        # Знайти об'єкт автора
+        author = next((author for author in self.author_list if author.name == author_name), None)
 
         # Створення вікна для вибору жанру
         genre_window = tk.Toplevel()
@@ -81,11 +92,7 @@ class BookController:
                         messagebox.showwarning("Warning", "Please rate the book between 1 and 5.")
 
                 # Перевірка всіх полів
-                if title and author_name and genre and country:
-                    # Створення автора
-                    author = Author(name=author_name, country=country, birth_date=None, death_date=None, gender="",
-                                    biography_link="")
-
+                if title and author and genre and country:
                     # Створення книги з автором
                     book = Book(title, author, genre, file_link, image_link, rating)
 

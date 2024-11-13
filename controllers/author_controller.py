@@ -9,8 +9,8 @@ from utils.ask_date import ask_date
 class AuthorController:
     def __init__(self, app, author_list, book_list):
         self.app = app
-        self.author_list = author_list  # Доступ к списку авторов
-        self.book_list = book_list  # Доступ к списку книг
+        self.author_list = author_list
+        self.book_list = book_list
 
     # Метод додавання автора
     def add_author(self):

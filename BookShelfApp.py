@@ -16,9 +16,9 @@ class BookShelfApp:
         self.author_list = []  # Список авторов
 
         # Инициализация контроллеров с доступом к спискам
-        self.book_controller = BookController(self, self.book_list)
+        self.book_controller = BookController(self, self.author_list, self.book_list)
         self.author_controller = AuthorController(self, self.author_list, self.book_list)
-        self.data_controller = DataController(self, self.book_list, self.author_list)
+        self.data_controller = DataController(self, self.author_list, self.book_list)
 
         # Создаем меню
         create_menu(self.root, self)
