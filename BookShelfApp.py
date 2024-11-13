@@ -7,8 +7,8 @@ from controllers.data_controller import DataController
 
 # Основной класс для приложения
 class BookShelfApp:
-    def __init__(self):
-        self.root = root
+    def __init__(self, root_window):
+        self.root = root_window
         self.root.title("Книжкова полиця")
 
         # Инициализация списков
@@ -21,10 +21,10 @@ class BookShelfApp:
         self.data_controller = DataController(self, self.book_list, self.author_list)
 
         # Создаем меню
-        create_menu(root, self)
+        create_menu(self.root, self)
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = BookShelfApp(root)
-    root.mainloop()
+    root_window = tk.Tk()
+    app = BookShelfApp(root_window)
+    root_window.mainloop()
