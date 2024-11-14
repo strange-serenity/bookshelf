@@ -11,121 +11,110 @@ class BookController:
         self.book_list = book_list
         self.author_list = author_list
 
-    # Метод додавання книги
     def add_book(self):
-        # Введення назви книги
-        title = None
-        while not title:  # Цикл будет продолжаться, пока не введено название
-            title = simpledialog.askstring("Input", "Enter the book title:")
-            if title is None:  # Якщо натиснуто Cancel або закрито вікно
-                return
-            if not title:  # Якщо залишено порожнім
-                messagebox.showwarning("Warning", "Please enter a title for the book.")
-
-        # Перевірка на наявність авторів
+        # Проверка на наличие авторов
         if not self.author_list:
-            messagebox.showwarning("Warning",
-                                   "There are no authors available. You cannot create a book without authors.")
+            messagebox.showwarning("Помилка", "Список авторів порожній. Спочатку додайте автора.")
             return
 
-        # Вибір автора з існуючого списку
-        author_window = tk.Toplevel(self.app.root)
-        author_window.title("Select Author")
-        author_label = tk.Label(author_window, text="Choose an author:")
-        author_label.pack()
+        # Создаем окно для ввода информации о книге
+        add_book_window = tk.Toplevel(self.app.root)
+        add_book_window.title("Додавання книги")
 
-        # Створення списку авторів в Listbox
-        author_names = [author.name for author in self.author_list]
-        listbox = tk.Listbox(author_window, selectmode=tk.SINGLE)
-        for name in author_names:
-            listbox.insert(tk.END, name)
-        listbox.pack(padx=20, pady=10)
+        # Поле для ввода названия книги
+        tk.Label(add_book_window, text="Назва книги:").grid(row=0, column=0, padx=10, pady=5)
+        title_entry = tk.Entry(add_book_window)
+        title_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        def select_author():
+        # Меню для выбора автора
+        tk.Label(add_book_window, text="Автор:").grid(row=1, column=0, padx=10, pady=5)
+        author_var = tk.StringVar(value=self.author_list[0].name)
+        author_menu = tk.OptionMenu(add_book_window, author_var, *[author.name for author in self.author_list])
+        author_menu.grid(row=1, column=1, padx=10, pady=5)
+
+        # Меню для выбора жанра
+        tk.Label(add_book_window, text="Жанр:").grid(row=2, column=0, padx=10, pady=5)
+        genre_var = tk.StringVar(value=GENRES[0])
+        genre_menu = tk.OptionMenu(add_book_window, genre_var, *GENRES)
+        genre_menu.grid(row=2, column=1, padx=10, pady=5)
+
+        # Меню для выбора страны
+        tk.Label(add_book_window, text="Країна:").grid(row=3, column=0, padx=10, pady=5)
+        country_var = tk.StringVar(value=COUNTRIES[0])
+        country_menu = tk.OptionMenu(add_book_window, country_var, *COUNTRIES)
+        country_menu.grid(row=3, column=1, padx=10, pady=5)
+
+        # Поле для выбора файла книги
+        tk.Label(add_book_window, text="Файл книги:").grid(row=4, column=0, padx=10, pady=5)
+        file_entry = tk.Entry(add_book_window)
+        file_entry.grid(row=4, column=1, padx=10, pady=5)
+
+        def select_file():
+            filename = filedialog.askopenfilename(title="Виберіть файл книги")
+            if filename:
+                file_entry.insert(0, filename)
+
+        tk.Button(add_book_window, text="Вибрати файл", command=select_file).grid(row=4, column=2, padx=10, pady=5)
+
+        # Поле для выбора изображения
+        tk.Label(add_book_window, text="Зображення обкладинки:").grid(row=5, column=0, padx=10, pady=5)
+        image_entry = tk.Entry(add_book_window)
+        image_entry.grid(row=5, column=1, padx=10, pady=5)
+
+        def select_image():
+            filename = filedialog.askopenfilename(title="Виберіть зображення обкладинки")
+            if filename:
+                image_entry.insert(0, filename)
+
+        tk.Button(add_book_window, text="Вибрати зображення", command=select_image).grid(row=5, column=2, padx=10,
+                                                                                         pady=5)
+
+        # Поле для ввода рейтинга
+        tk.Label(add_book_window, text="Оцінка (1-5):").grid(row=6, column=0, padx=10, pady=5)
+        rating_entry = tk.Entry(add_book_window)
+        rating_entry.grid(row=6, column=1, padx=10, pady=5)
+
+        # Функция для обработки нажатия кнопки ОК
+        def on_ok():
+            title = title_entry.get().strip()
+            author_name = author_var.get().strip()
+            genre = genre_var.get().strip()
+            country = country_var.get().strip()
+            file_link = file_entry.get().strip()
+            image_link = image_entry.get().strip()
+            rating_str = rating_entry.get().strip()
+
+            # Проверка, что все поля заполнены
+            if not (title and author_name and genre and country and file_link and image_link and rating_str):
+                messagebox.showwarning("Помилка", "Заповніть усі поля.")
+                return
+
+            # Проверка, что рейтинг корректный
             try:
-                # Получаем выбранного автора
-                selected_index = listbox.curselection()[0]
-                author_name = author_names[selected_index]
+                rating = int(rating_str)
+                if rating < 1 or rating > 5:
+                    raise ValueError
+            except ValueError:
+                messagebox.showwarning("Помилка", "Оцінка повинна бути числом від 1 до 5.")
+                return
 
-                # Знайти об'єкт автора
-                author = next((author for author in self.author_list if author.name == author_name), None)
-                author_window.destroy()
+            # Поиск объекта автора
+            author = next((author for author in self.author_list if author.name == author_name), None)
+            if not author:
+                messagebox.showwarning("Помилка", "Автор не знайдений у списку.")
+                return
 
-                # Створення вікна для вибору жанру
-                genre_window = tk.Toplevel()
-                genre_window.title("Select Genre")
-                genre_label = tk.Label(genre_window, text="Choose a genre:")
-                genre_label.pack()
+            # Добавление книги
+            book = Book(title, author, genre, file_link, image_link, rating)
+            self.book_list.append(book)
+            messagebox.showinfo("Успіх", "Книгу успішно додано!")
+            add_book_window.destroy()
 
-                genre_var = tk.StringVar()
-                genre_var.set(GENRES[0])  # За замовчуванням перший жанр
+        # Кнопка ОК для добавления книги
+        tk.Button(add_book_window, text="OK", command=on_ok).grid(row=7, column=1, pady=10)
 
-                genre_menu = tk.OptionMenu(genre_window, genre_var, *GENRES)
-                genre_menu.pack()
-
-                def select_genre():
-                    genre = genre_var.get()
-                    genre_window.destroy()
-
-                    # Вибір країни
-                    country_window = tk.Toplevel()
-                    country_window.title("Select Country")
-                    country_label = tk.Label(country_window, text="Choose a country:")
-                    country_label.pack()
-
-                    country_var = tk.StringVar()
-                    country_var.set(COUNTRIES[0])  # За замовчуванням перша країна
-
-                    country_menu = tk.OptionMenu(country_window, country_var, *COUNTRIES)
-                    country_menu.pack()
-
-                    def select_country():
-                        country = country_var.get()
-                        country_window.destroy()
-
-                        # Вибір файлів
-                        file_link = filedialog.askopenfilename(title="Select a file")
-                        if not file_link:  # Якщо натиснуто Cancel
-                            return
-
-                        image_link = filedialog.askopenfilename(title="Select an image file")
-                        if not image_link:  # Якщо натиснуто Cancel
-                            return
-
-                        # Оцінка книги
-                        rating = None
-                        while rating is None:  # Цикл для оцінки книги, поки не введено значення
-                            rating = simpledialog.askinteger("Input", "Rate the book (1-5):", minvalue=1, maxvalue=5)
-                            if rating is None:  # Якщо натиснуто Cancel або закрито вікно
-                                return
-                            if not (1 <= rating <= 5):  # Перевірка на діапазон
-                                messagebox.showwarning("Warning", "Please rate the book between 1 and 5.")
-
-                        # Перевірка всіх полів
-                        if title and author and genre and country:
-                            # Створення книги з автором
-                            book = Book(title, author, genre, file_link, image_link, rating)
-
-                            # Додавання книги до списку
-                            self.book_list.append(book)
-                            messagebox.showinfo("Success", "Book added successfully!")
-                        else:
-                            messagebox.showwarning("Incomplete Data", "Please fill all the fields to add a book.")
-
-                    # Кнопка вибору країни
-                    select_country_button = tk.Button(country_window, text="Select", command=select_country)
-                    select_country_button.pack()
-
-                # Кнопка вибору жанру
-                select_genre_button = tk.Button(genre_window, text="Select", command=select_genre)
-                select_genre_button.pack()
-
-            except IndexError:
-                messagebox.showwarning("Warning", "Please select an author.")
-
-        # Кнопка для вибору автора
-        select_author_button = tk.Button(author_window, text="Select", command=select_author)
-        select_author_button.pack(pady=5)
+        # Кнопка для отмены
+        tk.Button(add_book_window, text="Скасувати", command=add_book_window.destroy).grid(row=7, column=2, pady=10)
 
     # Метод видалення книги за назвою
     def delete_book(self):
@@ -165,16 +154,145 @@ class BookController:
         cancel_button = tk.Button(delete_window, text="Скасувати", command=delete_window.destroy)
         cancel_button.pack(pady=5)
 
-    # Оновлення інформації про книгу
     def update_book(self):
-        title = simpledialog.askstring("Оновлення книги", "Введіть назву книги для оновлення:")
-        for book in self.book_list:
-            if book.title.lower() == title.lower():
-                new_title = simpledialog.askstring("Нова назва", "Введіть нову назву:", initialvalue=book.title)
-                book.title = new_title or book.title  # оновити назву, якщо введено нове значення
-                messagebox.showinfo("Результат", "Інформацію оновлено.")
-                return
-        messagebox.showinfo("Результат", "Книгу не знайдено.")
+        if not self.book_list:
+            messagebox.showinfo("Помилка", "Немає книг для оновлення.")
+            return
+
+        # Окно выбора книги для обновления
+        select_book_window = tk.Toplevel(self.app.root)
+        select_book_window.title("Вибір книги для оновлення")
+
+        # Создаем список книг
+        tk.Label(select_book_window, text="Оберіть книгу:").pack()
+        book_titles = [book.title for book in self.book_list]
+        listbox = tk.Listbox(select_book_window, selectmode=tk.SINGLE)
+        for title in book_titles:
+            listbox.insert(tk.END, title)
+        listbox.pack(padx=20, pady=10)
+
+        def on_select():
+            try:
+                selected_index = listbox.curselection()[0]
+                selected_book = self.book_list[selected_index]
+                select_book_window.destroy()
+
+                # Окно для обновления информации о книге
+                update_book_window = tk.Toplevel(self.app.root)
+                update_book_window.title("Оновлення книги")
+
+                # Поле для названия
+                tk.Label(update_book_window, text="Назва книги:").grid(row=0, column=0, padx=10, pady=5)
+                title_entry = tk.Entry(update_book_window)
+                title_entry.insert(0, selected_book.title)
+                title_entry.grid(row=0, column=1, padx=10, pady=5)
+
+                # Меню для выбора автора
+                tk.Label(update_book_window, text="Автор:").grid(row=1, column=0, padx=10, pady=5)
+                author_var = tk.StringVar(value=selected_book.author.name)
+                author_menu = tk.OptionMenu(update_book_window, author_var,
+                                            *[author.name for author in self.author_list])
+                author_menu.grid(row=1, column=1, padx=10, pady=5)
+
+                # Меню для выбора жанра
+                tk.Label(update_book_window, text="Жанр:").grid(row=2, column=0, padx=10, pady=5)
+                genre_var = tk.StringVar(value=selected_book.genre)
+                genre_menu = tk.OptionMenu(update_book_window, genre_var, *GENRES)
+                genre_menu.grid(row=2, column=1, padx=10, pady=5)
+
+                # Меню для выбора страны
+                tk.Label(update_book_window, text="Країна:").grid(row=3, column=0, padx=10, pady=5)
+                country_var = tk.StringVar(value=selected_book.author.country)
+                country_menu = tk.OptionMenu(update_book_window, country_var, *COUNTRIES)
+                country_menu.grid(row=3, column=1, padx=10, pady=5)
+
+                # Поле для выбора файла книги
+                tk.Label(update_book_window, text="Файл книги:").grid(row=4, column=0, padx=10, pady=5)
+                file_entry = tk.Entry(update_book_window)
+                file_entry.insert(0, selected_book.file_link)
+                file_entry.grid(row=4, column=1, padx=10, pady=5)
+
+                def select_file():
+                    filename = filedialog.askopenfilename(title="Виберіть файл книги")
+                    if filename:
+                        file_entry.delete(0, tk.END)
+                        file_entry.insert(0, filename)
+
+                tk.Button(update_book_window, text="Вибрати файл", command=select_file).grid(row=4, column=2, padx=10,
+                                                                                             pady=5)
+
+                # Поле для выбора изображения
+                tk.Label(update_book_window, text="Зображення обкладинки:").grid(row=5, column=0, padx=10, pady=5)
+                image_entry = tk.Entry(update_book_window)
+                image_entry.insert(0, selected_book.image_link)
+                image_entry.grid(row=5, column=1, padx=10, pady=5)
+
+                def select_image():
+                    filename = filedialog.askopenfilename(title="Виберіть зображення обкладинки")
+                    if filename:
+                        image_entry.delete(0, tk.END)
+                        image_entry.insert(0, filename)
+
+                tk.Button(update_book_window, text="Вибрати зображення", command=select_image).grid(row=5, column=2,
+                                                                                                    padx=10, pady=5)
+
+                # Поле для рейтинга
+                tk.Label(update_book_window, text="Оцінка (1-5):").grid(row=6, column=0, padx=10, pady=5)
+                rating_entry = tk.Entry(update_book_window)
+                rating_entry.insert(0, str(selected_book.rating))
+                rating_entry.grid(row=6, column=1, padx=10, pady=5)
+
+                # Функция для сохранения обновленных данных
+                def on_save():
+                    title = title_entry.get().strip()
+                    author_name = author_var.get().strip()
+                    genre = genre_var.get().strip()
+                    country = country_var.get().strip()
+                    file_link = file_entry.get().strip()
+                    image_link = image_entry.get().strip()
+                    rating_str = rating_entry.get().strip()
+
+                    # Проверка, что все поля заполнены
+                    if not (title and author_name and genre and country and file_link and image_link and rating_str):
+                        messagebox.showwarning("Помилка", "Заповніть усі поля.")
+                        return
+
+                    # Проверка, что рейтинг корректный
+                    try:
+                        rating = int(rating_str)
+                        if rating < 1 or rating > 5:
+                            raise ValueError
+                    except ValueError:
+                        messagebox.showwarning("Помилка", "Оцінка повинна бути числом від 1 до 5.")
+                        return
+
+                    # Обновление данных книги
+                    selected_book.title = title
+                    selected_book.author = next((author for author in self.author_list if author.name == author_name),
+                                                None)
+                    selected_book.genre = genre
+                    selected_book.author.country = country
+                    selected_book.file_link = file_link
+                    selected_book.image_link = image_link
+                    selected_book.rating = rating
+
+                    messagebox.showinfo("Успіх", "Книгу успішно оновлено!")
+                    update_book_window.destroy()
+
+                # Кнопка для сохранения изменений
+                tk.Button(update_book_window, text="Зберегти", command=on_save).grid(row=7, column=1, pady=10)
+
+                # Кнопка для отмены
+                tk.Button(update_book_window, text="Скасувати", command=update_book_window.destroy).grid(row=7,
+                                                                                                         column=2,
+                                                                                                         pady=10)
+
+            except IndexError:
+                messagebox.showwarning("Помилка", "Будь ласка, оберіть книгу для оновлення.")
+
+        # Кнопка для выбора книги
+        tk.Button(select_book_window, text="Обрати", command=on_select).pack(pady=5)
+        tk.Button(select_book_window, text="Скасувати", command=select_book_window.destroy).pack(pady=5)
 
     # Пошук книги за назвою
     def search_book(self):
