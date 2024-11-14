@@ -3,6 +3,7 @@ from tkinter import simpledialog, messagebox, filedialog
 from constants.countries import COUNTRIES
 from models import Author
 from utils.ask_date import ask_date
+from datetime import datetime
 
 
 class AuthorController:
@@ -11,79 +12,86 @@ class AuthorController:
         self.author_list = author_list
         self.book_list = book_list
 
-    # Метод додавання автора
     def add_author(self):
-        # Запит імені
-        name = None
-        while not name:
-            name = simpledialog.askstring("Додавання автора", "Введіть ім'я автора:")
-            if name is None:  # Якщо натиснуто Cancel або закрито вікно
-                return
-            if not name:  # Якщо залишено порожнім
-                messagebox.showwarning("Помилка", "Ім'я автора не може бути порожнім.")
+        # Создание окна добавления автора
+        add_author_window = tk.Toplevel(self.app.root)
+        add_author_window.title("Додавання автора")
 
-        # Вибір країни з меню
-        country_window = tk.Toplevel()
-        country_window.title("Select Country")
-        country_label = tk.Label(country_window, text="Choose a country:")
-        country_label.pack()
+        # Поле для ввода имени
+        tk.Label(add_author_window, text="Ім'я автора:").grid(row=0, column=0, padx=10, pady=5)
+        name_entry = tk.Entry(add_author_window)
+        name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        country_var = tk.StringVar()
-        country_var.set(COUNTRIES[0])  # За замовчуванням перша країна
+        # Меню выбора страны
+        tk.Label(add_author_window, text="Країна:").grid(row=1, column=0, padx=10, pady=5)
+        country_var = tk.StringVar(value=COUNTRIES[0])
+        country_menu = tk.OptionMenu(add_author_window, country_var, *COUNTRIES)
+        country_menu.grid(row=1, column=1, padx=10, pady=5)
 
-        country_menu = tk.OptionMenu(country_window, country_var, *COUNTRIES)
-        country_menu.pack()
+        # Поле для ввода даты рождения
+        tk.Label(add_author_window, text="Дата народження (YYYY-MM-DD):").grid(row=2, column=0, padx=10, pady=5)
+        birth_date_entry = tk.Entry(add_author_window)
+        birth_date_entry.grid(row=2, column=1, padx=10, pady=5)
 
-        def select_country():
+        # Поле для ввода даты смерти
+        tk.Label(add_author_window, text="Дата смерті (YYYY-MM-DD):").grid(row=3, column=0, padx=10, pady=5)
+        death_date_entry = tk.Entry(add_author_window)
+        death_date_entry.grid(row=3, column=1, padx=10, pady=5)
+
+        # Радиокнопки для выбора пола
+        tk.Label(add_author_window, text="Стать:").grid(row=4, column=0, padx=10, pady=5)
+        gender_var = tk.StringVar(value="чоловіча")  # Значение по умолчанию
+
+        tk.Radiobutton(add_author_window, text="Чоловіча", variable=gender_var, value="чоловіча").grid(row=4, column=1,
+                                                                                                       sticky="w")
+        tk.Radiobutton(add_author_window, text="Жіноча", variable=gender_var, value="жіноча").grid(row=4, column=2,
+                                                                                                   sticky="w")
+
+        # Кнопка для выбора файла биографии
+        tk.Label(add_author_window, text="Біографія (файл):").grid(row=5, column=0, padx=10, pady=5)
+        biography_link_entry = tk.Entry(add_author_window)
+        biography_link_entry.grid(row=5, column=1, padx=10, pady=5)
+
+        def select_file():
+            filename = filedialog.askopenfilename(title="Виберіть файл біографії")
+            if filename:
+                biography_link_entry.insert(0, filename)
+
+        tk.Button(add_author_window, text="Вибрати файл", command=select_file).grid(row=5, column=2, padx=10, pady=5)
+
+        # Обработчик кнопки OK
+        def on_ok():
+            name = name_entry.get().strip()
             country = country_var.get()
-            country_window.destroy()
+            birth_date_str = birth_date_entry.get().strip()
+            death_date_str = death_date_entry.get().strip()
+            gender = gender_var.get()
+            biography_link = biography_link_entry.get().strip()
 
-            # Запит дати народження
-            birth_date = None
-            while not birth_date:
-                birth_date = ask_date("Дата народження")
-                if not birth_date:  # Якщо залишено порожнім
-                    messagebox.showwarning("Помилка", "Дата народження не може бути порожньою.")
-                elif birth_date is None:  # Якщо натиснуто Cancel або невірний формат дати
-                    return
+            # Проверка полей на заполненность
+            if not all([name, country, birth_date_str, death_date_str, gender, biography_link]):
+                messagebox.showwarning("Помилка", "Усі поля повинні бути заповнені.")
+                return
 
+            # Преобразование дат из строки в datetime
+            try:
+                birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
+                death_date = datetime.strptime(death_date_str, "%Y-%m-%d")
+            except ValueError:
+                messagebox.showwarning("Помилка", "Невірний формат дати. Використовуйте формат РРРР-ММ-ДД.")
+                return
 
-            # Запит дати смерті
-            death_date = None
-            while not death_date:
-                death_date = ask_date("Дата смерті")
-                if not death_date:  # Якщо залишено порожнім
-                    messagebox.showwarning("Помилка", "Дата смерті не може бути порожньою.")
-                elif death_date is None:  # Якщо натиснуто Cancel або невірний формат дати
-                    return
-
-            # Запит статі
-            gender = None
-            while not gender:
-                gender = simpledialog.askstring("Стать", "Введіть стать (чоловіча або жіноча):")
-                if gender is None:  # Якщо натиснуто Cancel або закрито вікно
-                    return
-                if not gender:  # Якщо залишено порожнім
-                    messagebox.showwarning("Помилка", "Стать не може бути порожньою.")
-
-            # Вибір файлу біографії
-            biography_link = None
-            while not biography_link:
-                biography_link = filedialog.askopenfilename(title="Виберіть файл біографії")
-                if not biography_link:  # Якщо натиснуто Cancel або не вибрано файл
-                    messagebox.showwarning("Помилка", "Файл біографії не вибрано.")
-                    return
-
-            # Створення автора
+            # Создание и добавление автора
             author = Author(name, country, birth_date, death_date, gender, biography_link)
-
-            # Додавання автора до списку
             self.author_list.append(author)
-            messagebox.showinfo("Success", "Author added successfully!")
+            messagebox.showinfo("Успіх", "Автор успішно доданий!")
+            add_author_window.destroy()
 
-        # Кнопка для підтвердження вибору країни
-        select_country_button = tk.Button(country_window, text="Select", command=select_country)
-        select_country_button.pack()
+        # Кнопка OK
+        tk.Button(add_author_window, text="OK", command=on_ok).grid(row=6, column=0, columnspan=2, pady=10)
+
+        # Кнопка Cancel
+        tk.Button(add_author_window, text="Скасувати", command=add_author_window.destroy).grid(row=6, column=1, pady=10)
     pass
 
     def delete_author(self):
