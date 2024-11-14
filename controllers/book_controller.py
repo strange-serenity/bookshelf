@@ -303,14 +303,44 @@ class BookController:
         else:
             messagebox.showinfo("Результати", "Книгу не знайдено.")
 
-    # Добавляем метод фильтрации книг по жанру
     def filter_books(self):
-        genre = simpledialog.askstring("Фільтрація за жанром", f"Введіть жанр для фільтрації {GENRES}:")
-        if genre not in GENRES:
-            messagebox.showwarning("Помилка", "Обраний жанр не існує в списку.")
+        # Проверяем наличие жанров
+        if not GENRES:
+            messagebox.showwarning("Помилка", "Список жанрів порожній.")
             return
-        filtered_books = [book for book in self.book_list if book.genre.lower() == genre.lower()]
-        if filtered_books:
-            messagebox.showinfo("Результати фільтрації", "\n".join(str(book) for book in filtered_books))
-        else:
-            messagebox.showinfo("Результати фільтрації", "Книги обраного жанру не знайдено.")
+
+        # Создаем окно выбора жанра
+        filter_window = tk.Toplevel(self.app.root)
+        filter_window.geometry("300x150")
+        filter_window.title("Фільтрація за жанром")
+
+        # Метка и выбор жанра
+        genre_label = tk.Label(filter_window, text="Виберіть жанр для фільтрації:")
+        genre_label.pack(pady=10)
+
+        # Переменная для хранения выбранного жанра
+        genre_var = tk.StringVar()
+        genre_var.set(GENRES[0])  # Устанавливаем первый жанр как значение по умолчанию
+
+        # Меню для выбора жанра
+        genre_menu = tk.OptionMenu(filter_window, genre_var, *GENRES)
+        genre_menu.pack(pady=10)
+
+        def apply_filter():
+            # Получаем выбранный жанр
+            genre = genre_var.get()
+            # Фильтрация книг по выбранному жанру
+            filtered_books = [book for book in self.book_list if book.genre.lower() == genre.lower()]
+            if filtered_books:
+                # Формируем строку с результатами
+                results = "\n".join(
+                    f"Назва: {book.title}, Автор: {book.author.name}, Рейтинг: {book.rating}" for book in
+                    filtered_books)
+                messagebox.showinfo("Результати фільтрації", results)
+            else:
+                messagebox.showinfo("Результати фільтрації", "Книги обраного жанру не знайдено.")
+            filter_window.destroy()
+
+        # Кнопка для применения фильтрации
+        filter_button = tk.Button(filter_window, text="Застосувати фільтр", command=apply_filter)
+        filter_button.pack(pady=10)
