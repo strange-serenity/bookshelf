@@ -140,61 +140,113 @@ class AuthorController:
             return
 
         # Окно для выбора автора
-        update_window = tk.Toplevel(self.app.root)
-        update_window.title("Вибір автора для оновлення")
+        select_author_window = tk.Toplevel(self.app.root)
+        select_author_window.title("Вибір автора для оновлення")
 
-        # Добавление списка авторов
-        listbox = tk.Listbox(update_window, selectmode=tk.SINGLE)
+        # Список авторов
+        listbox = tk.Listbox(select_author_window, selectmode=tk.SINGLE)
         for name in author_names:
             listbox.insert(tk.END, name)
         listbox.pack(padx=20, pady=10)
 
-        def on_update():
+        def open_update_window():
             try:
                 # Получаем выбранного автора
                 selected_index = listbox.curselection()[0]
                 selected_author_name = author_names[selected_index]
-
-                # Ищем автора по выбранному имени
+                # Ищем автора по имени
                 author_to_update = next(author for author in self.author_list if author.name == selected_author_name)
 
-                # Запрос новой информации для каждого поля
-                new_country = simpledialog.askstring("Нова країна", "Введіть нову країну:",
-                                                     initialvalue=author_to_update.country)
-                if new_country:  # Если введена новая страна, обновляем
-                    author_to_update.country = new_country
+                # Создание окна редактирования автора
+                update_author_window = tk.Toplevel(self.app.root)
+                update_author_window.title("Оновлення автора")
 
-                new_birth_date = ask_date("Нова дата народження")
-                if new_birth_date:  # Если введена новая дата, обновляем
-                    author_to_update.birth_date = new_birth_date
+                # Поля ввода с текущими значениями автора
+                tk.Label(update_author_window, text="Ім'я автора:").grid(row=0, column=0, padx=10, pady=5)
+                name_entry = tk.Entry(update_author_window)
+                name_entry.insert(0, author_to_update.name)
+                name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-                new_death_date = ask_date("Нова дата смерті")
-                if new_death_date:  # Если введена новая дата, обновляем
-                    author_to_update.death_date = new_death_date
+                # Меню выбора страны с текущим значением
+                tk.Label(update_author_window, text="Країна:").grid(row=1, column=0, padx=10, pady=5)
+                country_var = tk.StringVar(value=author_to_update.country)
+                country_menu = tk.OptionMenu(update_author_window, country_var, *COUNTRIES)
+                country_menu.grid(row=1, column=1, padx=10, pady=5)
 
-                new_gender = simpledialog.askstring("Нова стать", "Введіть нову стать:",
-                                                    initialvalue=author_to_update.gender)
-                if new_gender:  # Если введен новый пол, обновляем
-                    author_to_update.gender = new_gender
+                # Поле для ввода даты рождения с текущим значением
+                tk.Label(update_author_window, text="Дата народження (YYYY-MM-DD):").grid(row=2, column=0, padx=10,
+                                                                                          pady=5)
+                birth_date_entry = tk.Entry(update_author_window)
+                birth_date_entry.insert(0, author_to_update.birth_date.strftime("%Y-%m-%d"))
+                birth_date_entry.grid(row=2, column=1, padx=10, pady=5)
 
-                new_biography_link = filedialog.askopenfilename(title="Виберіть файл біографії",
-                                                                initialdir=author_to_update.biography_link or "")
-                if new_biography_link:  # Если выбрали новый файл, обновляем
-                    author_to_update.biography_link = new_biography_link
+                # Поле для ввода даты смерти с текущим значением
+                tk.Label(update_author_window, text="Дата смерті (YYYY-MM-DD):").grid(row=3, column=0, padx=10, pady=5)
+                death_date_entry = tk.Entry(update_author_window)
+                death_date_entry.insert(0, author_to_update.death_date.strftime("%Y-%m-%d"))
+                death_date_entry.grid(row=3, column=1, padx=10, pady=5)
 
-                # Уведомление об успешном обновлении
-                messagebox.showinfo("Результат", "Інформацію оновлено.")
-                update_window.destroy()
+                # Радиокнопки для выбора пола с текущим значением
+                tk.Label(update_author_window, text="Стать:").grid(row=4, column=0, padx=10, pady=5)
+                gender_var = tk.StringVar(value=author_to_update.gender)
+                tk.Radiobutton(update_author_window, text="Чоловіча", variable=gender_var, value="чоловіча").grid(row=4,
+                                                                                                                  column=1,
+                                                                                                                  sticky="w")
+                tk.Radiobutton(update_author_window, text="Жіноча", variable=gender_var, value="жіноча").grid(row=4,
+                                                                                                              column=2,
+                                                                                                              sticky="w")
+
+                # Поле для файла биографии с текущим значением
+                tk.Label(update_author_window, text="Біографія (файл):").grid(row=5, column=0, padx=10, pady=5)
+                biography_link_entry = tk.Entry(update_author_window)
+                biography_link_entry.insert(0, author_to_update.biography_link)
+                biography_link_entry.grid(row=5, column=1, padx=10, pady=5)
+
+                def select_file():
+                    filename = filedialog.askopenfilename(title="Виберіть файл біографії")
+                    if filename:
+                        biography_link_entry.delete(0, tk.END)
+                        biography_link_entry.insert(0, filename)
+
+                tk.Button(update_author_window, text="Вибрати файл", command=select_file).grid(row=5, column=2, padx=10,
+                                                                                               pady=5)
+
+                # Обработчик кнопки OK
+                def on_ok():
+                    # Считываем обновленные данные
+                    author_to_update.name = name_entry.get().strip()
+                    author_to_update.country = country_var.get()
+                    author_to_update.gender = gender_var.get()
+                    author_to_update.biography_link = biography_link_entry.get().strip()
+
+                    # Преобразование дат из строки в datetime
+                    try:
+                        author_to_update.birth_date = datetime.strptime(birth_date_entry.get().strip(), "%Y-%m-%d")
+                        author_to_update.death_date = datetime.strptime(death_date_entry.get().strip(), "%Y-%m-%d")
+                    except ValueError:
+                        messagebox.showwarning("Помилка", "Невірний формат дати. Використовуйте формат РРРР-ММ-ДД.")
+                        return
+
+                    # Закрытие окна и уведомление об успехе
+                    messagebox.showinfo("Результат", "Інформацію оновлено.")
+                    update_author_window.destroy()
+                    select_author_window.destroy()
+
+                # Кнопка OK
+                tk.Button(update_author_window, text="Оновити", command=on_ok).grid(row=6, column=0, columnspan=2,
+                                                                                    pady=10)
+
+                # Кнопка Cancel
+                tk.Button(update_author_window, text="Скасувати", command=update_author_window.destroy).grid(row=6,
+                                                                                                             column=1,
+                                                                                                             pady=10)
+
             except IndexError:
                 messagebox.showwarning("Помилка", "Будь ласка, виберіть автора для оновлення.")
 
-        # Кнопка для обновления
-        update_button = tk.Button(update_window, text="Оновити", command=on_update)
-        update_button.pack(pady=5)
-
-        # Кнопка для закрытия окна без изменений
-        cancel_button = tk.Button(update_window, text="Скасувати", command=update_window.destroy)
-        cancel_button.pack(pady=5)
+        # Кнопка для открытия окна обновления
+        tk.Button(select_author_window, text="Обрати", command=open_update_window).pack(pady=5)
+        tk.Button(select_author_window, text="Скасувати", command=select_author_window.destroy).pack(pady=5)
 
     # Пошук авторів
     def find_author_by_name(self, name):
