@@ -26,5 +26,6 @@ class BookShelfApp:
 
 if __name__ == "__main__":
     root_window = tk.Tk()
+    root_window.geometry("400x300")
     app = BookShelfApp(root_window)
     root_window.mainloop()
