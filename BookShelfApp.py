@@ -25,12 +25,12 @@ class BookShelfApp:
         create_menu(self.root, self)
 
         # Создаем список книг
-        self.book_listbox = tk.Listbox(self.root, width=50, height=10)
+        self.book_listbox = tk.Listbox(self.root, width=80, height=50)
         self.book_listbox.pack(padx=20, pady=10, side=tk.LEFT)
 
         # Кнопка для обновления списка книг
         self.refresh_button = tk.Button(self.root, text="Оновити список книг", command=self.update_book_list)
-        self.refresh_button.pack(pady=5, side=tk.LEFT)
+        self.refresh_button.pack(side=tk.LEFT)
 
         # Обновляем список книг при запуске
         self.update_book_list()
@@ -53,8 +53,8 @@ class BookShelfApp:
         self.rating_label.pack()
 
         # Текстовое поле для отображения текста книги
-        self.text_area = tk.Text(self.root, width=40, height=10)
-        self.text_area.pack(side=tk.LEFT, padx=20)
+        self.text_area = tk.Text(self.root, width=60, height=50)
+        self.text_area.pack(side=tk.RIGHT, padx=20)
         self.text_area.insert(tk.END, "Выберите книгу для просмотра текста.")
 
         # Обработчик для выбора книги

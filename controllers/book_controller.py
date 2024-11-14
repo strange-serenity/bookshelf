@@ -21,6 +21,10 @@ class BookController:
         add_book_window = tk.Toplevel(self.app.root)
         add_book_window.title("Додавання книги")
 
+        # Устанавливаем, чтобы это окно было поверх основного
+        add_book_window.grab_set()  # Захват фокуса
+        add_book_window.transient(self.app.root)  # Сделать окно зависимым от основного
+
         # Поле для ввода названия книги
         tk.Label(add_book_window, text="Назва книги:").grid(row=0, column=0, padx=10, pady=5)
         title_entry = tk.Entry(add_book_window)
@@ -162,6 +166,10 @@ class BookController:
         # Окно выбора книги для обновления
         select_book_window = tk.Toplevel(self.app.root)
         select_book_window.title("Вибір книги для оновлення")
+
+        # Устанавливаем, чтобы это окно было поверх основного
+        select_book_window.grab_set()  # Захват фокуса
+        select_book_window.transient(self.app.root)  # Сделать окно зависимым от основного
 
         # Создаем список книг
         tk.Label(select_book_window, text="Оберіть книгу:").pack()

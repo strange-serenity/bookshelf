@@ -17,6 +17,10 @@ class AuthorController:
         add_author_window = tk.Toplevel(self.app.root)
         add_author_window.title("Додавання автора")
 
+        # Устанавливаем, чтобы это окно было поверх основного
+        add_author_window.grab_set()  # Захват фокуса
+        add_author_window.transient(self.app.root)  # Сделать окно зависимым от основного
+
         # Поле для ввода имени
         tk.Label(add_author_window, text="Ім'я автора:").grid(row=0, column=0, padx=10, pady=5)
         name_entry = tk.Entry(add_author_window)
@@ -92,6 +96,7 @@ class AuthorController:
 
         # Кнопка Cancel
         tk.Button(add_author_window, text="Скасувати", command=add_author_window.destroy).grid(row=6, column=1, pady=10)
+
     pass
 
     def delete_author(self):
@@ -142,6 +147,10 @@ class AuthorController:
         # Окно для выбора автора
         select_author_window = tk.Toplevel(self.app.root)
         select_author_window.title("Вибір автора для оновлення")
+
+        # Устанавливаем, чтобы это окно было поверх основного
+        select_author_window.grab_set()  # Захват фокуса
+        select_author_window.transient(self.app.root)  # Сделать окно зависимым от основного
 
         # Список авторов
         listbox = tk.Listbox(select_author_window, selectmode=tk.SINGLE)
