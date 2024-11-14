@@ -13,8 +13,8 @@ class DataController:
         file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
         if file_path:
             data = {
-                "books": [book.__dict__ for book in self.book_list],
-                "authors": [author.__dict__ for author in self.author_list]
+                "books": [book.to_dict() for book in self.book_list],  # используем метод to_dict
+                "authors": [author.to_dict() for author in self.author_list]  # используем метод to_dict
             }
             with open(file_path, "w", encoding="utf-8") as file:
                 json.dump(data, file, ensure_ascii=False, default=str)
@@ -26,8 +26,9 @@ class DataController:
         if file_path:
             with open(file_path, "r", encoding="utf-8") as file:
                 data = json.load(file)
-                self.book_list = [Book(**book) for book in data["books"]]
-                self.author_list = [Author(**author) for author in data["authors"]]
+                # Используем from_dict для восстановления объектов
+                self.book_list = [Book.from_dict(book) for book in data["books"]]
+                self.author_list = [Author.from_dict(author) for author in data["authors"]]
             messagebox.showinfo("Завантаження", "Дані завантажено успішно!")
 
     # Перегляд усіх книг
