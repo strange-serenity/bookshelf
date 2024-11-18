@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox, filedialog
 from constants.countries import COUNTRIES
 from models import Author
-from utils.ask_date import ask_date
 from datetime import datetime
 
 
@@ -13,36 +12,36 @@ class AuthorController:
         self.book_list = book_list
 
     def add_author(self):
-        # Создание окна добавления автора
+        # Створення вікна додавання автора
         add_author_window = tk.Toplevel(self.app.root)
         add_author_window.title("Додавання автора")
 
-        # Устанавливаем, чтобы это окно было поверх основного
+        # Робимо щоб додаткове вікно було вище за основне
         add_author_window.grab_set()  # Захват фокуса
-        add_author_window.transient(self.app.root)  # Сделать окно зависимым от основного
+        add_author_window.transient(self.app.root)  # Зробили вікно залежним від основного
 
-        # Поле для ввода имени
+        # Поле для вводу імені
         tk.Label(add_author_window, text="Ім'я автора:").grid(row=0, column=0, padx=10, pady=5)
         name_entry = tk.Entry(add_author_window)
         name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-        # Меню выбора страны
+        # Меню вибору країни
         tk.Label(add_author_window, text="Країна:").grid(row=1, column=0, padx=10, pady=5)
         country_var = tk.StringVar(value=COUNTRIES[0])
         country_menu = tk.OptionMenu(add_author_window, country_var, *COUNTRIES)
         country_menu.grid(row=1, column=1, padx=10, pady=5)
 
-        # Поле для ввода даты рождения
+        # Поле для вводу даты народження
         tk.Label(add_author_window, text="Дата народження (YYYY-MM-DD):").grid(row=2, column=0, padx=10, pady=5)
         birth_date_entry = tk.Entry(add_author_window)
         birth_date_entry.grid(row=2, column=1, padx=10, pady=5)
 
-        # Поле для ввода даты смерти
+        # Поле для вводу дати смерті
         tk.Label(add_author_window, text="Дата смерті (YYYY-MM-DD):").grid(row=3, column=0, padx=10, pady=5)
         death_date_entry = tk.Entry(add_author_window)
         death_date_entry.grid(row=3, column=1, padx=10, pady=5)
 
-        # Радиокнопки для выбора пола
+        # Радіокнопки для выбору статі
         tk.Label(add_author_window, text="Стать:").grid(row=4, column=0, padx=10, pady=5)
         gender_var = tk.StringVar(value="чоловіча")  # Значение по умолчанию
 
@@ -51,7 +50,7 @@ class AuthorController:
         tk.Radiobutton(add_author_window, text="Жіноча", variable=gender_var, value="жіноча").grid(row=4, column=2,
                                                                                                    sticky="w")
 
-        # Кнопка для выбора файла биографии
+        # Кнопка для выбору файлу біографії
         tk.Label(add_author_window, text="Біографія (файл):").grid(row=5, column=0, padx=10, pady=5)
         biography_link_entry = tk.Entry(add_author_window)
         biography_link_entry.grid(row=5, column=1, padx=10, pady=5)
@@ -72,12 +71,12 @@ class AuthorController:
             gender = gender_var.get()
             biography_link = biography_link_entry.get().strip()
 
-            # Проверка полей на заполненность
+            # Перевірка полей на заповненність
             if not all([name, country, birth_date_str, death_date_str, gender, biography_link]):
                 messagebox.showwarning("Помилка", "Усі поля повинні бути заповнені.")
                 return
 
-            # Преобразование дат из строки в datetime
+            # Преобразовання дат зі строки в datetime
             try:
                 birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
                 death_date = datetime.strptime(death_date_str, "%Y-%m-%d")
@@ -85,7 +84,7 @@ class AuthorController:
                 messagebox.showwarning("Помилка", "Невірний формат дати. Використовуйте формат РРРР-ММ-ДД.")
                 return
 
-            # Создание и добавление автора
+            # Створення и додавання автору
             author = Author(name, country, birth_date, death_date, gender, biography_link)
             self.author_list.append(author)
             messagebox.showinfo("Успіх", "Автор успішно доданий!")
@@ -100,17 +99,17 @@ class AuthorController:
     pass
 
     def delete_author(self):
-        # Открытие диалогового окна для выбора автора из списка
+        # Відкриття діалогового вікна для вибору автора зі списка
         author_names = [author.name for author in self.author_list]
         if not author_names:
             messagebox.showinfo("Помилка", "Немає авторів для видалення.")
             return
 
-        # Создаём окно для выбора автора
+        # Робимо вікно для выбору автора
         delete_window = tk.Toplevel(self.app.root)
         delete_window.title("Вибір автора для видалення")
 
-        # Добавляем список авторов
+        # Додаємо список авторів
         listbox = tk.Listbox(delete_window, selectmode=tk.SINGLE)
         for name in author_names:
             listbox.insert(tk.END, name)
@@ -119,40 +118,40 @@ class AuthorController:
 
         def on_delete():
             try:
-                # Получаем выбранного автора
+                # Отримуємо обраного автора
                 selected_index = listbox.curselection()[0]
                 selected_author_name = author_names[selected_index]
-                # Удаляем выбранного автора из списка
+                # Видаляєм обраного автора зі списка
                 self.author_list = [author for author in self.author_list if author.name != selected_author_name]
                 messagebox.showinfo("Результат", f"Автор '{selected_author_name}' видалений.")
                 delete_window.destroy()
             except IndexError:
                 messagebox.showwarning("Помилка", "Будь ласка, виберіть автора для видалення.")
 
-        # Кнопка для удаления
+        # Кнопка для видалення
         delete_button = tk.Button(delete_window, text="Видалити", command=on_delete)
         delete_button.pack(pady=5)
 
-        # Кнопка для закрытия окна без изменений
+        # Кнопка для закритяя вікна без змін
         cancel_button = tk.Button(delete_window, text="Скасувати", command=delete_window.destroy)
         cancel_button.pack(pady=5)
 
     def update_author(self):
-        # Создание списка имен авторов
+        # Створення списку імен авторів
         author_names = [author.name for author in self.author_list]
         if not author_names:
             messagebox.showinfo("Помилка", "Немає авторів для оновлення.")
             return
 
-        # Окно для выбора автора
+        # Вікно для вибору автора
         select_author_window = tk.Toplevel(self.app.root)
         select_author_window.title("Вибір автора для оновлення")
 
-        # Устанавливаем, чтобы это окно было поверх основного
-        select_author_window.grab_set()  # Захват фокуса
-        select_author_window.transient(self.app.root)  # Сделать окно зависимым от основного
+        # Робимо, щоб окно вікно було поверх основного
+        select_author_window.grab_set()  # Захват фокусу
+        select_author_window.transient(self.app.root)  # Зробити вікно залежним від основного
 
-        # Список авторов
+        # Список авторів
         listbox = tk.Listbox(select_author_window, selectmode=tk.SINGLE)
         for name in author_names:
             listbox.insert(tk.END, name)
@@ -160,42 +159,42 @@ class AuthorController:
 
         def open_update_window():
             try:
-                # Получаем выбранного автора
+                # Отримуємо вибранного автора
                 selected_index = listbox.curselection()[0]
                 selected_author_name = author_names[selected_index]
-                # Ищем автора по имени
+                # Шукаємо автора за ім'ям
                 author_to_update = next(author for author in self.author_list if author.name == selected_author_name)
 
-                # Создание окна редактирования автора
+                # Створення вікна редагування автору
                 update_author_window = tk.Toplevel(self.app.root)
                 update_author_window.title("Оновлення автора")
 
-                # Поля ввода с текущими значениями автора
+                # Поля вводу с текущими значеннями автору
                 tk.Label(update_author_window, text="Ім'я автора:").grid(row=0, column=0, padx=10, pady=5)
                 name_entry = tk.Entry(update_author_window)
                 name_entry.insert(0, author_to_update.name)
                 name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-                # Меню выбора страны с текущим значением
+                # Меню вибору країни с текущим значенням
                 tk.Label(update_author_window, text="Країна:").grid(row=1, column=0, padx=10, pady=5)
                 country_var = tk.StringVar(value=author_to_update.country)
                 country_menu = tk.OptionMenu(update_author_window, country_var, *COUNTRIES)
                 country_menu.grid(row=1, column=1, padx=10, pady=5)
 
-                # Поле для ввода даты рождения с текущим значением
+                # Поле для вводу дати нарождення с текущим значенням
                 tk.Label(update_author_window, text="Дата народження (YYYY-MM-DD):").grid(row=2, column=0, padx=10,
                                                                                           pady=5)
                 birth_date_entry = tk.Entry(update_author_window)
                 birth_date_entry.insert(0, author_to_update.birth_date.strftime("%Y-%m-%d"))
                 birth_date_entry.grid(row=2, column=1, padx=10, pady=5)
 
-                # Поле для ввода даты смерти с текущим значением
+                # Поле для вводу дати смерті с текущим значенням
                 tk.Label(update_author_window, text="Дата смерті (YYYY-MM-DD):").grid(row=3, column=0, padx=10, pady=5)
                 death_date_entry = tk.Entry(update_author_window)
                 death_date_entry.insert(0, author_to_update.death_date.strftime("%Y-%m-%d"))
                 death_date_entry.grid(row=3, column=1, padx=10, pady=5)
 
-                # Радиокнопки для выбора пола с текущим значением
+                # Радіокнопки для выбору статі с текущим значенням
                 tk.Label(update_author_window, text="Стать:").grid(row=4, column=0, padx=10, pady=5)
                 gender_var = tk.StringVar(value=author_to_update.gender)
                 tk.Radiobutton(update_author_window, text="Чоловіча", variable=gender_var, value="чоловіча").grid(row=4,
@@ -205,7 +204,7 @@ class AuthorController:
                                                                                                               column=2,
                                                                                                               sticky="w")
 
-                # Поле для файла биографии с текущим значением
+                # Поле для файлу біографії с текущим значенням
                 tk.Label(update_author_window, text="Біографія (файл):").grid(row=5, column=0, padx=10, pady=5)
                 biography_link_entry = tk.Entry(update_author_window)
                 biography_link_entry.insert(0, author_to_update.biography_link)
@@ -222,13 +221,13 @@ class AuthorController:
 
                 # Обработчик кнопки OK
                 def on_ok():
-                    # Считываем обновленные данные
+                    # Оброблюємо оновленні дані
                     author_to_update.name = name_entry.get().strip()
                     author_to_update.country = country_var.get()
                     author_to_update.gender = gender_var.get()
                     author_to_update.biography_link = biography_link_entry.get().strip()
 
-                    # Преобразование дат из строки в datetime
+                    # Преобразування дат зі строки в datetime
                     try:
                         author_to_update.birth_date = datetime.strptime(birth_date_entry.get().strip(), "%Y-%m-%d")
                         author_to_update.death_date = datetime.strptime(death_date_entry.get().strip(), "%Y-%m-%d")
@@ -236,7 +235,7 @@ class AuthorController:
                         messagebox.showwarning("Помилка", "Невірний формат дати. Використовуйте формат РРРР-ММ-ДД.")
                         return
 
-                    # Закрытие окна и уведомление об успехе
+                    # Закрыття вікна и повідомлення про успії
                     messagebox.showinfo("Результат", "Інформацію оновлено.")
                     update_author_window.destroy()
                     select_author_window.destroy()
@@ -253,7 +252,7 @@ class AuthorController:
             except IndexError:
                 messagebox.showwarning("Помилка", "Будь ласка, виберіть автора для оновлення.")
 
-        # Кнопка для открытия окна обновления
+        # Кнопка для відкриття вікна оновлення
         tk.Button(select_author_window, text="Обрати", command=open_update_window).pack(pady=5)
         tk.Button(select_author_window, text="Скасувати", command=select_author_window.destroy).pack(pady=5)
 
@@ -269,7 +268,7 @@ class AuthorController:
             messagebox.showwarning("Помилка", "Автор не знайдений.")
             return
 
-        # Поиск книг по имени автора
+        # Пошук книг за ім'ям автора
         found_books = [book for book in self.book_list if
                        book.author and book.author.name.lower() == author_name.lower()]
         if found_books:
