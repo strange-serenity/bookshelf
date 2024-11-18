@@ -17,7 +17,7 @@ class Author:
     def __str__(self):
         return f"{self.name} ({self.country})"
 
-    # Метод для сохранения автора в словарь
+    # Метод для збереження автора в словник
     def to_dict(self):
         return {
             "name": self.name,
@@ -28,7 +28,7 @@ class Author:
             "biography_link": self.biography_link
         }
 
-    # Метод для создания объекта автора из словаря
+    # Метод для створення об'єкта автора з словника
     @classmethod
     def from_dict(cls, data):
         birth_date = datetime.fromisoformat(data['birth_date']) if data['birth_date'] else None
@@ -47,9 +47,9 @@ class Book:
         self.rating = rating
 
     def __str__(self):
-        return f"{self.title} by {self.author.name} - {self.genre} - Rating: {self.rating}/5"
+        return f"{self.title} від {self.author.name} - {self.genre} - Рейтинг: {self.rating}/5"
 
-    # Метод для сохранения книги в словарь
+    # Метод для збереження книги в словник
     def to_dict(self):
         return {
             "title": self.title,
@@ -60,35 +60,35 @@ class Book:
             "rating": self.rating
         }
 
-    # Метод для создания объекта книги из словаря
+    # Метод для створення об'єкта книги з словника
     @classmethod
     def from_dict(cls, data):
         author = Author.from_dict(data['author'])
         return cls(data['title'], author, data['genre'], data['file_link'], data['image_link'], data['rating'])
 
 
-# Класс для работы с библиотекой
+# Клас для роботи з бібліотекою
 class Library:
     def __init__(self):
         self.books = []
 
-    # Метод для добавления книги
+    # Метод для додавання книги
     def add_book(self, book: Book):
         self.books.append(book)
 
-    # Метод для сохранения данных в файл
+    # Метод для збереження даних у файл
     def save_to_file(self, filename: str):
         with open(filename, 'w', encoding='utf-8') as file:
             data = [book.to_dict() for book in self.books]
             json.dump(data, file, ensure_ascii=False, indent=4)
 
-    # Метод для загрузки данных из файла
+    # Метод для завантаження даних з файлу
     def load_from_file(self, filename: str):
         try:
             with open(filename, 'r', encoding='utf-8') as file:
                 data = json.load(file)
                 self.books = [Book.from_dict(book_data) for book_data in data]
         except FileNotFoundError:
-            print(f"Файл {filename} не найден.")
+            print(f"Файл {filename} не знайдено.")
         except json.JSONDecodeError:
-            print(f"Ошибка при чтении данных из файла {filename}.")
+            print(f"Помилка при читанні даних з файлу {filename}.")
