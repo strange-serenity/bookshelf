@@ -5,6 +5,7 @@ from controllers.author_controller import AuthorController
 from controllers.data_controller import DataController
 from PIL import Image, ImageTk  # Імпортуємо Pillow
 
+
 class BookShelfApp:
     def __init__(self, root_window):
         self.root = root_window
@@ -50,9 +51,9 @@ class BookShelfApp:
         self.text_area.grid(row=0, column=2, padx=20, pady=10, sticky="n")
         self.text_area.insert(tk.END, "Виберіть книгу для перегляду тексту.")
 
-        # Область для отображения обложки книги (справа от текста)
-        self.image_label = tk.Label(self.root, text="Обложка книги", width=30, height=15, relief="solid")
-        self.image_label.grid(row=0, column=3, padx=20, pady=10, sticky="n")
+        # Canvas для отображения изображения книги (справа от текста)
+        self.image_canvas = tk.Canvas(self.root, width=400, height=600)
+        self.image_canvas.grid(row=0, column=3, padx=20, pady=10, sticky="n")
 
         # Привязка событий
         self.book_listbox.bind('<<ListboxSelect>>', self.on_book_select)
@@ -73,15 +74,28 @@ class BookShelfApp:
             self.genre_label.config(text=f"Жанр: {book.genre}")
             self.rating_label.config(text=f"Рейтинг: {book.rating}")
 
-            # Загрузка изображения
+            # Загрузка изображения с сохранением пропорций
             try:
+                # Открытие изображения
                 book_image = Image.open(f"{book.image_link}")
-                book_image = book_image.resize((200, 300), Image.ANTIALIAS)
+
+                # Получаем размеры контейнера для изображения
+                container_width = 400  # Ширина контейнера
+                container_height = 600  # Высота контейнера
+
+                # Изменяем размер изображения с сохранением пропорций
+                book_image.thumbnail((container_width, container_height), Image.Resampling.LANCZOS)
+
+                # Преобразование изображения в формат, поддерживаемый Tkinter
                 book_image = ImageTk.PhotoImage(book_image)
-                self.image_label.config(image=book_image)
-                self.image_label.image = book_image
+
+                # Очищаем canvas и рисуем новое изображение
+                self.image_canvas.delete("all")
+                self.image_canvas.create_image(0, 0, anchor="nw", image=book_image)
+                self.image_canvas.image = book_image  # Сохраняем ссылку на изображение
             except Exception as e:
-                self.image_label.config(text="Не удалось загрузить обложку", image="")
+                self.image_canvas.delete("all")
+                self.image_canvas.create_text(200, 300, text="Не удалось загрузить обложку", anchor="center")
 
             # Отображение текста книги
             self.text_area.delete(1.0, tk.END)
