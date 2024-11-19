@@ -26,7 +26,7 @@ class BookShelfApp:
         self.book_listbox.grid(row=0, column=0, padx=20, pady=10, sticky="n")
 
         # Кнопка оновлення списку книг
-        self.refresh_button = tk.Button(self.root, text="Оновити список книг", command=self.update_book_list)
+        self.refresh_button = tk.Button(self.root, text="Оновити список книг", command=self.data_controller.update_book_list)
         self.refresh_button.grid(row=1, column=0, pady=10, sticky="n")
 
         # Панель інформації про книгу (по центру)
@@ -67,7 +67,7 @@ class BookShelfApp:
         if selected_index:
             book = self.book_list[selected_index[0]]
 
-            # Оновлюємо мітки з інформацією про книгу
+            # Обновляем метки с информацией о книге
             self.title_label.config(text=f"Назва книги: {book.title}")
             self.author_label.config(text=f"Автор: {book.author.name}")
             self.genre_label.config(text=f"Жанр: {book.genre}")
