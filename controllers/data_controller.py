@@ -200,14 +200,13 @@ class DataController:
         select_button = tk.Button(author_window, text="Обрати", command=on_select_author)
         select_button.pack(side="bottom", pady=10)
 
-    # Метод для отображения информации об авторе
     def show_author_details(self, author):
         # Создаем окно с информацией об авторе
         details_window = tk.Toplevel(self.app.root)
         details_window.title(f"Інформація про автора: {author.name}")
-        details_window.geometry("400x300")
+        details_window.geometry("500x500")
 
-        # Отображаем информацию об авторе
+        # Отображаем основную информацию об авторе
         tk.Label(details_window, text=f"Ім'я: {author.name}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
         tk.Label(details_window, text=f"Країна: {author.country}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
         tk.Label(details_window,
@@ -218,10 +217,25 @@ class DataController:
                  font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
         tk.Label(details_window, text=f"Стать: {author.gender}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
 
-        # Ссылка на биографию (если есть)
-        if author.biography_link:
-            tk.Label(details_window, text=f"Біографія: {author.biography_link}", font=("Arial", 12), fg="blue",
-                     cursor="hand2").pack(anchor="w", padx=10, pady=5)
+        # Текстовое поле для биографии
+        text_frame = tk.Frame(details_window)
+        text_frame.pack(pady=10)
+
+        text_area = tk.Text(text_frame, width=60, height=15, wrap="word", font=("Arial", 10))
+        text_area.pack()
+
+        # Попытка загрузки текста из файла
+        try:
+            with open(author.biography_link, "r", encoding="utf-8") as file:
+                biography_text = file.read()
+                if biography_text.strip():  # Если текст не пустой
+                    text_area.insert("1.0", biography_text)
+                else:
+                    text_area.insert("1.0", "Біографія відсутня.")
+        except FileNotFoundError:
+            text_area.insert("1.0", "Шлях до файлу біографії некоректний або файл не знайдено.")
+        except Exception as e:
+            text_area.insert("1.0", f"Помилка завантаження біографії: {str(e)}")
 
         # Кнопка для закрытия окна
         close_button = tk.Button(details_window, text="Закрити", command=details_window.destroy)
