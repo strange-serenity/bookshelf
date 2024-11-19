@@ -170,7 +170,7 @@ class DataController:
 
         # Создаем окно выбора книги
         author_window = tk.Toplevel(self.app.root)
-        author_window.geometry("300x400")
+        author_window.geometry("300x370")
         author_window.title("Список авторів")
 
         tk.Label(author_window, text="Оберіть автора:").pack(pady=10)
@@ -199,10 +199,6 @@ class DataController:
         # Кнопка "Обрати" для подтверждения выбора
         select_button = tk.Button(author_window, text="Обрати", command=on_select_author)
         select_button.pack(side="bottom", pady=10)
-
-        # Кнопка для закрытия окна
-        close_button = tk.Button(author_window, text="Закрити", command=author_window.destroy)
-        close_button.pack(side="bottom", pady=5)
 
     # Метод для отображения информации об авторе
     def show_author_details(self, author):
