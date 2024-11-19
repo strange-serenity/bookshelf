@@ -41,29 +41,29 @@ class DataController:
 
         # Создаем окно выбора книги
         book_window = tk.Toplevel(self.app.root)
-        book_window.geometry("300x400")
+        book_window.geometry("300x300")
         book_window.title("Вибір книги")
 
         tk.Label(book_window, text="Оберіть книгу:").pack(pady=10)
 
-        # Переменная для хранения выбора книги
-        selected_book = tk.StringVar()
-        selected_book.set(self.book_list[0].title)
+        # Создаем Listbox для отображения списка книг
+        book_listbox = tk.Listbox(book_window, height=10, width=40)
+        book_listbox.pack(pady=10)
 
-        # Создаем меню выбора книг
-        book_menu = tk.OptionMenu(book_window, selected_book, *[book.title for book in self.book_list])
-        book_menu.pack(pady=10)
+        # Заполняем Listbox списком книг
+        for book in self.book_list:
+            book_listbox.insert(tk.END, book.title)
 
         def apply_selection():
-            # Ищем выбранную книгу
-            book_title = selected_book.get()
-            selected = next((book for book in self.book_list if book.title == book_title), None)
-
-            if selected:
-                # Открываем новое окно с информацией о выбранной книге
-                self.open_book_info_window(selected)
+            # Получаем выбранную книгу
+            selected_index = book_listbox.curselection()
+            if selected_index:
+                selected_book = self.book_list[selected_index[0]]
+                # Открываем окно с информацией о книге
+                self.open_book_info_window(selected_book)
             book_window.destroy()
 
+        # Кнопка для применения выбора
         tk.Button(book_window, text="ОК", command=apply_selection).pack(pady=10)
 
     def open_book_info_window(self, book):
@@ -163,9 +163,70 @@ class DataController:
         except Exception as e:
             self.app.text_area.insert(tk.END, f"Помилка при відкритті файлу: {e}")
 
-    # Перегляд усіх авторів
     def view_authors(self):
-        if self.author_list:
-            messagebox.showinfo("Список авторів", "\n".join(str(author) for author in self.author_list))
-        else:
+        if not self.author_list:
             messagebox.showinfo("Список авторів", "Немає авторів у бібліотеці.")
+            return
+
+        # Создаем окно выбора книги
+        author_window = tk.Toplevel(self.app.root)
+        author_window.geometry("300x400")
+        author_window.title("Список авторів")
+
+        tk.Label(author_window, text="Оберіть автора:").pack(pady=10)
+
+
+        # Добавляем Listbox для отображения авторов
+        author_listbox = tk.Listbox(author_window, width=50, height=15)
+        author_listbox.pack(side="top", fill="both", expand=True, padx=10, pady=10)
+
+        # Добавляем авторов в Listbox
+        for author in self.author_list:
+            author_listbox.insert(tk.END, author.name)
+
+        # Функция для обработки выбора автора
+        def on_select_author():
+            selected_index = author_listbox.curselection()
+            if selected_index:
+                selected_author = self.author_list[selected_index[0]]
+
+                # Открываем новое окно с информацией об авторе
+                self.show_author_details(selected_author)
+
+            else:
+                messagebox.showwarning("Попередження", "Оберіть автора зі списку!")
+
+        # Кнопка "Обрати" для подтверждения выбора
+        select_button = tk.Button(author_window, text="Обрати", command=on_select_author)
+        select_button.pack(side="bottom", pady=10)
+
+        # Кнопка для закрытия окна
+        close_button = tk.Button(author_window, text="Закрити", command=author_window.destroy)
+        close_button.pack(side="bottom", pady=5)
+
+    # Метод для отображения информации об авторе
+    def show_author_details(self, author):
+        # Создаем окно с информацией об авторе
+        details_window = tk.Toplevel(self.app.root)
+        details_window.title(f"Інформація про автора: {author.name}")
+        details_window.geometry("400x300")
+
+        # Отображаем информацию об авторе
+        tk.Label(details_window, text=f"Ім'я: {author.name}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
+        tk.Label(details_window, text=f"Країна: {author.country}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
+        tk.Label(details_window,
+                 text=f"Дата народження: {author.birth_date.strftime('%d.%m.%Y') if author.birth_date else 'Невідомо'}",
+                 font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
+        tk.Label(details_window,
+                 text=f"Дата смерті: {author.death_date.strftime('%d.%m.%Y') if author.death_date else 'Живий або невідомо'}",
+                 font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
+        tk.Label(details_window, text=f"Стать: {author.gender}", font=("Arial", 12)).pack(anchor="w", padx=10, pady=5)
+
+        # Ссылка на биографию (если есть)
+        if author.biography_link:
+            tk.Label(details_window, text=f"Біографія: {author.biography_link}", font=("Arial", 12), fg="blue",
+                     cursor="hand2").pack(anchor="w", padx=10, pady=5)
+
+        # Кнопка для закрытия окна
+        close_button = tk.Button(details_window, text="Закрити", command=details_window.destroy)
+        close_button.pack(side="bottom", pady=10)

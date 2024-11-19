@@ -3,7 +3,6 @@ from views.menu import create_menu
 from controllers.book_controller import BookController
 from controllers.author_controller import AuthorController
 from controllers.data_controller import DataController
-from PIL import Image, ImageTk  # Імпортуємо Pillow
 
 class BookShelfApp:
     def __init__(self, root_window):
