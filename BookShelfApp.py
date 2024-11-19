@@ -5,16 +5,15 @@ from controllers.author_controller import AuthorController
 from controllers.data_controller import DataController
 from PIL import Image, ImageTk  # Імпортуємо Pillow
 
-
 class BookShelfApp:
     def __init__(self, root_window):
         self.root = root_window
         self.root.title("Книжкова полиця")
-        self.root.geometry("1200x700")  # Установил размер окна
+        self.root.geometry("1200x700")  # Встановив розмір вікна
         self.book_list = []  # Список книг
-        self.author_list = []  # Список авторов
+        self.author_list = []  # Список авторів
 
-        # Контроллеры
+        # Контролери
         self.book_controller = BookController(self, self.author_list, self.book_list)
         self.author_controller = AuthorController(self, self.author_list, self.book_list)
         self.data_controller = DataController(self, self.author_list, self.book_list)
@@ -22,15 +21,15 @@ class BookShelfApp:
         # Меню
         create_menu(self.root, self)
 
-        # Список книг (слева)
+        # Список книг (зліва)
         self.book_listbox = tk.Listbox(self.root, width=50, height=30)
         self.book_listbox.grid(row=0, column=0, padx=20, pady=10, sticky="n")
 
-        # Кнопка обновления списка книг
+        # Кнопка оновлення списку книг
         self.refresh_button = tk.Button(self.root, text="Оновити список книг", command=self.update_book_list)
         self.refresh_button.grid(row=1, column=0, pady=10, sticky="n")
 
-        # Панель информации о книге (по центру)
+        # Панель інформації про книгу (по центру)
         self.info_frame = tk.Frame(self.root, width=300, height=200, relief="groove", borderwidth=2)
         self.info_frame.grid(row=0, column=1, padx=20, pady=10, sticky="n")
 
@@ -46,16 +45,16 @@ class BookShelfApp:
         self.rating_label = tk.Label(self.info_frame, text="Рейтинг: ", anchor="w", font=("Arial", 12))
         self.rating_label.pack(anchor="w", padx=10, pady=5)
 
-        # Область для отображения текста книги (справа)
+        # Область для відображення тексту книги (праворуч)
         self.text_area = tk.Text(self.root, width=60, height=30, wrap="word", font=("Arial", 10))
         self.text_area.grid(row=0, column=2, padx=20, pady=10, sticky="n")
         self.text_area.insert(tk.END, "Виберіть книгу для перегляду тексту.")
 
-        # Canvas для отображения изображения книги (справа от текста)
+        # Canvas для відображення зображення книги (праворуч від тексту)
         self.image_canvas = tk.Canvas(self.root, width=400, height=600)
         self.image_canvas.grid(row=0, column=3, padx=20, pady=10, sticky="n")
 
-        # Привязка событий
+        # Прив'язка подій
         self.book_listbox.bind('<<ListboxSelect>>', self.on_book_select)
 
     def update_book_list(self):
@@ -68,36 +67,36 @@ class BookShelfApp:
         if selected_index:
             book = self.book_list[selected_index[0]]
 
-            # Обновляем метки с информацией о книге
+            # Оновлюємо мітки з інформацією про книгу
             self.title_label.config(text=f"Назва книги: {book.title}")
             self.author_label.config(text=f"Автор: {book.author.name}")
             self.genre_label.config(text=f"Жанр: {book.genre}")
             self.rating_label.config(text=f"Рейтинг: {book.rating}")
 
-            # Загрузка изображения с сохранением пропорций
+            # Завантаження зображення з збереженням пропорцій
             try:
-                # Открытие изображения
+                # Відкриття зображення
                 book_image = Image.open(f"{book.image_link}")
 
-                # Получаем размеры контейнера для изображения
+                # Отримуємо розміри контейнера для зображення
                 container_width = 400  # Ширина контейнера
-                container_height = 600  # Высота контейнера
+                container_height = 600  # Висота контейнера
 
-                # Изменяем размер изображения с сохранением пропорций
+                # Змінюємо розмір зображення з збереженням пропорцій
                 book_image.thumbnail((container_width, container_height), Image.Resampling.LANCZOS)
 
-                # Преобразование изображения в формат, поддерживаемый Tkinter
+                # Перетворення зображення у формат, який підтримує Tkinter
                 book_image = ImageTk.PhotoImage(book_image)
 
-                # Очищаем canvas и рисуем новое изображение
+                # Очищаємо canvas і малюємо нове зображення
                 self.image_canvas.delete("all")
                 self.image_canvas.create_image(0, 0, anchor="nw", image=book_image)
-                self.image_canvas.image = book_image  # Сохраняем ссылку на изображение
+                self.image_canvas.image = book_image  # Зберігаємо посилання на зображення
             except Exception as e:
                 self.image_canvas.delete("all")
-                self.image_canvas.create_text(200, 300, text="Не удалось загрузить обложку", anchor="center")
+                self.image_canvas.create_text(200, 300, text="Не вдалося завантажити обкладинку", anchor="center")
 
-            # Отображение текста книги
+            # Відображення тексту книги
             self.text_area.delete(1.0, tk.END)
             try:
                 with open(book.file_link, 'r', encoding='utf-8') as file:
